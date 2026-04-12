@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VenueSync - Real-Time Venue Experience</title>
+    <meta name="description" content="Enhance your physical event experience with real-time wait times and schedule syncing.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-ticket-alt"></i>
+                <h2>VenueSync</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="view-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</li>
+                <li data-target="view-map"><i class="fas fa-map-marked-alt"></i> Map</li>
+                <li data-target="view-food"><i class="fas fa-hamburger"></i> Food & Drink</li>
+                <li data-target="view-info"><i class="fas fa-info-circle"></i> Info</li>
+            </ul>
+            <div class="user-profile">
+                <div class="avatar">U</div>
+                <div class="user-info">
+                    <p class="name">User</p>
+                    <p class="ticket">Ticket: VIP-A12</p>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard">
+            <header class="top-nav">
+                <h1>Live Dashboard</h1>
+                <div class="time-display" id="current-time">00:00</div>
+            </header>
+
+            <div id="view-dashboard" class="view-section active">
+            <div class="grid-container">
+                <!-- Live Events Sync Card -->
+                <section class="card span-2 event-sync" id="event-card">
+                    <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
+                        <h3><i class="fas fa-film"></i> Live Multi-Hall Synchronization</h3>
+                        <span class="badge pulse-green">3 Active</span>
+                    </div>
+                    <div class="card-body" id="events-container" style="display: flex; flex-direction: column; gap: 1.5rem; padding-top: 1rem;">
+                        <!-- Events injected by JS -->
+                    </div>
+                </section>
+
+                <!-- Washroom Wait Times -->
+                <section class="card facility-wait" id="washrooms-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-restroom"></i> Washrooms</h3>
+                    </div>
+                    <div class="card-body list">
+                        <div class="facility-item" data-id="washroom-a">
+                            <span class="facility-name">Level 1 - North</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-washroom-a">-- min</span>
+                                <div class="status-dot green"></div>
+                            </div>
+                        </div>
+                        <div class="facility-item" data-id="washroom-b">
+                            <span class="facility-name">Level 1 - South</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-washroom-b">-- min</span>
+                                <div class="status-dot green"></div>
+                            </div>
+                        </div>
+                        <div class="facility-item" data-id="washroom-c">
+                            <span class="facility-name">Level 2 - VIP</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-washroom-c">-- min</span>
+                                <div class="status-dot green"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Food Court Wait Times -->
+                <section class="card facility-wait" id="foodcourt-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-utensils"></i> Food Courts</h3>
+                    </div>
+                    <div class="card-body list">
+                        <div class="facility-item" data-id="food-a">
+                            <span class="facility-name">Popcorn Plaza</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-food-a">-- min</span>
+                                <div class="status-dot yellow"></div>
+                            </div>
+                        </div>
+                        <div class="facility-item" data-id="food-b">
+                            <span class="facility-name">Burger Grill</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-food-b">-- min</span>
+                                <div class="status-dot red"></div>
+                            </div>
+                        </div>
+                        <div class="facility-item" data-id="food-c">
+                            <span class="facility-name">Drinks Kiosk</span>
+                            <div class="wait-indicator">
+                                <span class="wait-time" id="wait-food-c">-- min</span>
+                                <div class="status-dot green"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Live Updates / Notifications -->
+                <section class="card span-2 updates">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bell"></i> Live Updates</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul id="update-log" class="update-log">
+                            <!-- Updates will be injected here -->
+                        </ul>
+                    </div>
+                </section>
+            </div>
+            </div>
+
+            <!-- MAP VIEW -->
+            <div id="view-map" class="view-section" style="display:none;">
+                <div class="card map-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-map-marked-alt"></i> Interactive Venue Map</h3>
+                        <span class="badge pulse-green">Live Map</span>
+                    </div>
+                    <div class="card-body" style="padding: 1.5rem; text-align: center;">
+                        <img src="venue_map.png" alt="High-tech Venue Map" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);">
+                        <p style="color: var(--text-secondary); margin-top: 1rem; font-size: 0.9rem;">
+                            <i class="fas fa-info-circle" style="color: var(--accent-neon);"></i> Displaying real-time venue layout mapping.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOD VIEW -->
+            <div id="view-food" class="view-section" style="display:none;">
+                <div class="card span-2" style="margin-bottom: 1.5rem;">
+                    <div class="card-header">
+                        <h3><i class="fas fa-utensils"></i> All Food Concessions</h3>
+                    </div>
+                    <div class="card-body list">
+                        <div class="facility-item">
+                            <div style="display:flex; flex-direction:column; gap:0.3rem;">
+                                <span class="facility-name">Popcorn Plaza</span>
+                                <span style="font-size:0.85rem; color:var(--text-secondary);">Level 1 - Snacks & Drinks</span>
+                            </div>
+                            <span style="padding: 0.4rem 1rem; background: var(--accent-blue); border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--accent-neon)'" onmouseout="this.style.background='var(--accent-blue)'">Pre-order</span>
+                        </div>
+                        <div class="facility-item">
+                            <div style="display:flex; flex-direction:column; gap:0.3rem;">
+                                <span class="facility-name">Burger Grill</span>
+                                <span style="font-size:0.85rem; color:var(--text-secondary);">Level 2 - Meals</span>
+                            </div>
+                            <span style="padding: 0.4rem 1rem; background: var(--accent-blue); border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--accent-neon)'" onmouseout="this.style.background='var(--accent-blue)'">Pre-order</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFO VIEW -->
+            <div id="view-info" class="view-section" style="display:none;">
+                <div class="card span-2">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Venue Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 1rem; color: var(--accent-neon);">Venue Policies</h4>
+                        <ul style="list-style-position: inside; color: var(--text-secondary); line-height: 1.8; margin-bottom: 2rem;">
+                            <li>Outside food and drinks are not permitted.</li>
+                            <li>Please keep your ticket barcode handy for re-entry.</li>
+                            <li>Smoking is only allowed in designated outdoor areas.</li>
+                        </ul>
+                        <h4 style="margin-bottom: 1rem; color: var(--accent-neon);">Contact Support</h4>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">Need help with your ticket or seat? Contact our guest services.</p>
+                        <button style="padding: 0.8rem 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent-blue); color: var(--text-primary); border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'" onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'"><i class="fas fa-headset" style="margin-right: 0.5rem;"></i> Contact Guest Services</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
