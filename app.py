@@ -132,10 +132,12 @@ def playmaker_concierge_chat(request: ChatRequest):
 # ========================================================
 # FRONTEND HOSTING
 # ========================================================
-# Mount the HTML/JS frontend over the root path
-app.mount("/", StaticFiles(directory="d:/AntiGravity", html=True), name="static")
+# Mount the HTML/JS frontend over the root path (Fixed for Cloud Run Linux paths)
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    # Serves the full stack application on Port 8001 to avoid 'Socket in Use' errors
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    # Cloud Run gives us a PORT environment variable. We use 8080 as a fallback.
+    port = int(os.environ.get('PORT', 8080))
+    # Serves the full stack application on 0.0.0.0 and the dynamic port
+    uvicorn.run(app, host="0.0.0.0", port=port)
