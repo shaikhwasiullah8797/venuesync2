@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VenueSync - Real-Time Venue Experience</title>
-    <meta name="description"
-        content="Enhance your physical event experience with real-time wait times and schedule syncing.">
-    <!-- SEO Optimization -->
+    <meta name="description" content="Enhance your physical event experience with real-time wait times and schedule syncing.">
+    
+    <!-- PWA & SEO -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#0b0f19">
     <link rel="stylesheet" href="styles.css">
@@ -39,8 +42,7 @@
       }
     </script>
     <script type="module" src="app.js" defer></script>
-    <!-- Strict Content Security Policy for 100% Security Score -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://translate.googleapis.com https://translate.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
 </head>
 
 <body>
@@ -59,13 +61,13 @@
             <ul class="nav-links" role="menu">
                 <li class="active" data-target="view-dashboard" role="menuitem" tabindex="0" aria-label="Dashboard"><i class="fas fa-chart-pie" aria-hidden="true"></i> Dashboard</li>
                 <li data-target="view-map" role="menuitem" tabindex="0" aria-label="Venue Map"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Map</li>
-                <li data-target="view-food"><i class="fas fa-hamburger" style="width:20px;"></i> <span
+                <li data-target="view-food" role="menuitem" tabindex="0" aria-label="Food and Beverages"><i class="fas fa-hamburger" style="width:20px;" aria-hidden="true"></i> <span
                         data-lang-key="navFood">Food & Beverages</span></li>
-                <li data-target="view-info"><i class="fas fa-info-circle" style="width:20px;"></i> <span
+                <li data-target="view-info" role="menuitem" tabindex="0" aria-label="Analytics Info"><i class="fas fa-info-circle" style="width:20px;" aria-hidden="true"></i> <span
                         data-lang-key="navInfo">Analytics</span></li>
-                <li id="nav-sos"
+                <li id="nav-sos" role="menuitem" tabindex="0" aria-label="Incident Feed"
                     style="margin-top: 2rem; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); font-weight: 800; text-align: center; justify-content: center; border-radius: 8px; padding: 15px; cursor: pointer; transition: 0.3s;">
-                    <i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> <span
+                    <i class="fas fa-clipboard-list" style="margin-right: 8px;" aria-hidden="true"></i> <span
                         data-lang-key="navSos">Incident Feed</span></li>
             </ul>
             <div class="user-profile">
@@ -139,7 +141,7 @@
                             <div class="facility-item" data-id="washroom-c">
                                 <span class="facility-name">Level 2 - VIP</span>
                                 <div class="wait-indicator">
-                                    <span class="wait-time" id="wait-washroom-c">-- min</span>
+                                    <span class="wait-time" id="wait-washroom-c" aria-live="polite">-- min</span>
                                     <div class="status-dot green"></div>
                                 </div>
                             </div>
@@ -208,10 +210,10 @@
                             style="display: grid; grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 90px 240px 90px; gap: 12px; width: 100%; height: 100%; padding: 15px; box-sizing: border-box; background: radial-gradient(circle at center, rgba(30, 215, 96, 0.05) 0%, rgba(0,0,0,0.6) 100%);">
 
                             <!-- North Gate (Top) -->
-                            <div style="grid-column: 1 / 4; background: rgba(59, 130, 246, 0.1); border: 1px dashed var(--accent-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 15px; cursor: pointer; transition: 0.3s;"
+                            <div id="map-North-Gate" role="button" tabindex="0" aria-label="North Gate Map Sector" style="grid-column: 1 / 4; background: rgba(59, 130, 246, 0.1); border: 1px dashed var(--accent-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 15px; cursor: pointer; transition: 0.3s;"
                                 onmouseover="this.style.background='rgba(59, 130, 246, 0.2)';"
                                 onmouseout="this.style.background='rgba(59, 130, 246, 0.1)';">
-                                <i class="fas fa-door-open" style="font-size: 1.5rem; color: var(--accent-blue);"></i>
+                                <i class="fas fa-door-open" style="font-size: 1.5rem; color: var(--accent-blue);" aria-hidden="true"></i>
                                 <div style="text-align: left;">
                                     <strong
                                         style="color: white; font-size: 1.1rem; display:block; margin-bottom: 2px;">North
@@ -232,7 +234,7 @@
                                 </div>
                                 <div style="text-align:center;">
                                     <i class="fas fa-restroom"
-                                        style="font-size: 1.6rem; color: var(--text-secondary); margin-bottom:6px; display:block;"></i>
+                                        style="font-size: 1.6rem; color: var(--text-secondary); margin-bottom:6px; display:block;" aria-hidden="true"></i>
                                     <span style="color: white; font-size: 0.95rem; font-weight:bold;">Restrooms</span>
                                 </div>
                             </div>
@@ -249,7 +251,7 @@
                                 </div>
 
                                 <i class="fas fa-futbol"
-                                    style="font-size: 2.8rem; color: var(--status-green); margin-bottom: 10px; z-index: 2;"></i>
+                                    style="font-size: 2.8rem; color: var(--status-green); margin-bottom: 10px; z-index: 2;" aria-hidden="true"></i>
                                 <strong
                                     style="color: white; font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">MAIN
                                     PITCH</strong>
@@ -259,7 +261,7 @@
                             </div>
 
                             <!-- East Concourse (Right) -->
-                            <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; cursor: pointer; transition: 0.3s;"
+                            <div id="map-East-Gate" role="button" tabindex="0" aria-label="East Gate Sector" style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; cursor: pointer; transition: 0.3s;"
                                 onmouseover="this.style.background='rgba(255, 215, 0, 0.15)';"
                                 onmouseout="this.style.background='rgba(255, 215, 0, 0.05)';">
                                 <div style="text-align:center;">
@@ -275,10 +277,10 @@
                             </div>
 
                             <!-- South Gate & Food (Bottom) -->
-                            <div style="grid-column: 1 / 4; background: rgba(255, 165, 0, 0.1); border: 2px solid var(--status-yellow); border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 20px; cursor: pointer; transition: 0.3s;"
+                            <div id="map-Popcorn-Plaza" role="button" tabindex="0" aria-label="Popcorn Plaza and South Gate" style="grid-column: 1 / 4; background: rgba(255, 165, 0, 0.1); border: 2px solid var(--status-yellow); border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 20px; cursor: pointer; transition: 0.3s;"
                                 onmouseover="this.style.background='rgba(255, 165, 0, 0.2)';"
                                 onmouseout="this.style.background='rgba(255, 165, 0, 0.1)';">
-                                <i class="fas fa-hamburger" style="font-size: 2rem; color: var(--status-yellow);"></i>
+                                <i class="fas fa-hamburger" style="font-size: 2rem; color: var(--status-yellow);" aria-hidden="true"></i>
                                 <div style="text-align: left;">
                                     <strong
                                         style="color: white; display: block; font-size: 1.1rem; margin-bottom: 2px;">South
@@ -539,13 +541,11 @@
                             <li>Security shift rotation occurs at 22:00 local time.</li>
                         </ul>
                         <h4 style="margin-bottom: 1rem; color: var(--accent-neon);">Staff Directory</h4>
-                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">Direct communication channels to
-                            squad leaders.</p>
-                        <button
+                        <button aria-label="Contact Guest Services" tabindex="0"
                             style="padding: 0.8rem 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent-blue); color: var(--text-primary); border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;"
                             onmouseover="this.style.background='rgba(59, 130, 246, 0.3)'"
                             onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'"><i class="fas fa-headset"
-                                style="margin-right: 0.5rem;"></i> Contact Guest Services</button>
+                                style="margin-right: 0.5rem;" aria-hidden="true"></i> Contact Guest Services</button>
                     </div>
                 </div>
             </div>
@@ -569,7 +569,7 @@
             <i class="fas fa-times" id="close-chat"
                 style="color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;"></i>
         </div>
-        <div id="chat-messages"
+        <div id="chat-messages" role="log" aria-live="polite"
             style="flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
             <div
                 style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 2px; color: var(--text-secondary); max-width: 85%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">
@@ -579,12 +579,12 @@
         </div>
         <div
             style="padding: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; background: rgba(0,0,0,0.2);">
-            <button id="chat-mic"
+            <button id="chat-mic" aria-label="Use Microphone"
                 style="background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 50%; width: 45px; height: 45px; cursor: pointer; transition: 0.2s;"><i
-                    class="fas fa-microphone"></i></button>
-            <input type="text" id="chat-input" placeholder="Ask AI..."
+                    class="fas fa-microphone" aria-hidden="true"></i></button>
+            <input type="text" id="chat-input" placeholder="Ask AI..." aria-label="AI Chat Input"
                 style="flex-grow: 1; padding: 12px 15px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: white; outline: none; font-family: 'Inter', sans-serif;">
-            <button id="chat-send"
+            <button id="chat-send" aria-label="Send Message"
                 style="background: var(--accent-blue); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; transition: 0.2s;"><i
                     class="fas fa-paper-plane"></i></button>
         </div>

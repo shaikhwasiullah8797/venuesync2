@@ -38,14 +38,15 @@ app = FastAPI(title="VenueSync Ops Engine", lifespan=lifespan)
 # ========================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "https://venuesync.app", "https://venuesync2.vercel.app"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
 @app.middleware("http")
-async def add_security_headers(request: Request, call_next):
+async def add_security_headers(request: Request, call_next) -> Response:
+    """Injects high-security HTTP headers directly into the response lifecycle."""
     response = await call_next(request)
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -88,9 +89,20 @@ async def simulate_stadium_crowd_engine():
 # ========================================================
 
 @app.get("/api/crowd_data")
-def get_crowd_data():
+def get_crowd_data() -> JSONResponse:
     """Returns the live output of the backend simulator to the dashboard."""
     return JSONResponse(crowd_metrics)
+
+class SurgeRequest(BaseModel):
+    facility: str = Field(..., max_length=100)
+
+@app.post("/api/surge")
+def trigger_surge(request: SurgeRequest) -> JSONResponse:
+    """Instantly spikes the wait time for a facility to demonstrate AI routing overrides."""
+    if request.facility in crowd_metrics:
+        crowd_metrics[request.facility] = 100
+        return JSONResponse({"status": "Surge deployed", "facility": request.facility})
+    return JSONResponse({"error": "Facility not found"}, status_code=404)
 
 # ========================================================
 # HACKATHON FEATURE 2/5: NLP-DRIVEN EMERGENCY TRIAGE (STRUCTURED OUTPUTS)
@@ -99,7 +111,7 @@ class SOSTriageRequest(BaseModel):
     message: str = Field(..., max_length=500) # Security constraint
 
 @app.post("/api/sos_triage")
-def process_sos(request: SOSTriageRequest):
+def process_sos(request: SOSTriageRequest) -> JSONResponse:
     """Takes a natural language panic string and enforces strict Gemini 1.5 JSON Triage Schema."""
     if not os.getenv("GOOGLE_API_KEY"):
         return JSONResponse({"error": "No API Key active. Please add Google credentials."}, status_code=401)
@@ -145,7 +157,7 @@ class ChatRequest(BaseModel):
     query: str = Field(..., max_length=2000)
 
 @app.post("/api/chat")
-def playmaker_concierge_chat(request: ChatRequest):
+def playmaker_concierge_chat(request: ChatRequest) -> JSONResponse:
     """Executes Gemini with function calling toolsets enabled."""
     if not os.getenv("GOOGLE_API_KEY"):
         return JSONResponse({"error": "No API Key active."}, status_code=401)
@@ -174,7 +186,7 @@ class TTSRequest(BaseModel):
     text: str = Field(..., max_length=1000)
 
 @app.post("/api/tts")
-async def generate_tts(request: TTSRequest):
+async def generate_tts(request: TTSRequest) -> Response:
     """Securely utilizes authentic Google Cloud SDK for Audio Generation to replace local browser synth."""
     try:
         client = texttospeech.TextToSpeechClient()

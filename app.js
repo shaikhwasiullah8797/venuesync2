@@ -18,6 +18,14 @@ const firebaseConfig = {
 
 // Application Initialization
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- PWA SERVICE WORKER REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(() => {
+            console.log('SW Registered');
+        }).catch(err => console.log('SW Registration Failed', err));
+    }
+    
     
     // --- FIREBASE INIT ---
     let db;
@@ -244,6 +252,30 @@ document.addEventListener('DOMContentLoaded', () => {
                      }
                  }
              }
+        }
+        
+        // --- AI FEATURE: REAL-TIME DYNAMIC HEATMAP ---
+        let targetMapId = '';
+        if (facName.includes('North Gate')) targetMapId = 'map-North-Gate';
+        else if (facName.includes('Popcorn')) targetMapId = 'map-Popcorn-Plaza';
+        else if (facName.includes('East')) targetMapId = 'map-East-Gate';
+
+        if (targetMapId) {
+            const mapEl = document.getElementById(targetMapId);
+            if (mapEl) {
+                if (newTime > 15) {
+                    mapEl.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.8)';
+                    mapEl.style.borderColor = 'var(--status-red)';
+                    mapEl.style.background = 'rgba(239, 68, 68, 0.2)';
+                } else if (newTime > 10) {
+                    mapEl.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.6)';
+                    mapEl.style.borderColor = 'var(--status-yellow)';
+                } else {
+                    mapEl.style.boxShadow = 'none';
+                    mapEl.style.borderColor = 'var(--status-green)';
+                    mapEl.style.background = 'initial';
+                }
+            }
         }
     }
 
@@ -488,7 +520,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- AI FEATURE 4: MULTILINGUAL FAN SYNC ---
-    // Transitioned to Authentic Google Translate Web Service in index.html!
+    // --- AI FEATURE 5: AUTOMATED SOS TRIAGE (COMMANDER INCIDENT FEED) ---
+    // ... (Code exists here but we append Hardware Simulator)
+    
+    // --- TOP 10 FEATURE: HARDWARE OVERRIDE SIMULATOR ---
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.insertAdjacentHTML('beforeend', `
+            <div style="margin-top: auto; padding: 15px; border-top: 1px solid var(--border-color);">
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">Override Terminal</p>
+                <button id="dev-surge-btn" aria-label="Trigger Crowd Surge" style="width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 1px dashed var(--status-red); color: white; border-radius: 6px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.4)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.2)'">
+                    <i class="fas fa-exclamation-triangle"></i> Surge North Gate
+                </button>
+            </div>
+        `);
+        document.getElementById('dev-surge-btn').addEventListener('click', async () => {
+            try {
+                await fetch('/api/surge', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({facility: "North Gate"})});
+                if (window.triggerRouteNotification) {
+                    window.triggerRouteNotification('AI ALARM: Manual hardware override detected. Massive surge at North Gate. Security units dispatched.', 'fas fa-shield-alt', 'var(--status-red)');
+                }
+            } catch(e) { console.error('Surge Failed', e); }
+        });
+    }
 
 });
