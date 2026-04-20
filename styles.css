@@ -411,6 +411,21 @@ body {
 }
 
 /* Responsive */
+.mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
+
 @media (max-width: 1024px) {
     .grid-container {
         grid-template-columns: 1fr;
@@ -421,24 +436,21 @@ body {
 }
 
 @media (max-width: 768px) {
+    .mobile-toggle {
+        display: block;
+    }
     .sidebar {
-        width: 80px;
-        padding: 2rem 0.5rem;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 260px;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
     }
-    .logo h2, .nav-links span, .user-info {
-        display: none;
-    }
-    .logo {
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-    .nav-links li {
-        justify-content: center;
-        padding: 1rem;
+    .sidebar.active {
+        transform: translateX(0);
     }
     .dashboard {
-        margin-left: 80px;
-        padding: 1.5rem;
+        margin-left: 0;
+        padding: 5rem 1.5rem 1.5rem 1.5rem; /* Space for hamburger */
     }
     .top-nav h1 {
         font-size: 1.5rem;
@@ -451,7 +463,8 @@ button,
 #chat-mic, 
 #chat-send, 
 #ai-fab, 
-#view-food span[style*="cursor: pointer"] {
+#view-food span[style*="cursor: pointer"],
+.mobile-toggle {
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     will-change: transform, box-shadow;
 }
@@ -461,7 +474,8 @@ button:hover:not(:disabled),
 #chat-mic:hover,
 #chat-send:hover,
 #ai-fab:hover,
-#view-food span[style*="cursor: pointer"]:hover {
+#view-food span[style*="cursor: pointer"]:hover,
+.mobile-toggle:hover {
     transform: translateY(-3px) scale(1.03) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
     filter: brightness(1.15) !important;
@@ -472,11 +486,23 @@ button:active:not(:disabled),
 #chat-mic:active,
 #chat-send:active,
 #ai-fab:active,
-#view-food span[style*="cursor: pointer"]:active {
+#view-food span[style*="cursor: pointer"]:active,
+.mobile-toggle:active {
     transform: translateY(1px) scale(0.95) !important;
     background-color: #a855f7 !important; /* Neon Purple */
     color: white !important;
     border-color: #d8b4fe !important;
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.5) !important;
     transition: all 0.05s ease !important;
+}
+
+/* Food Court Buttons Alignment Fix */
+#view-food .facility-item > div:last-child {
+    display: flex;
+    justify-content: flex-end;
+}
+#view-food .facility-item > div:last-child > span:first-child {
+    display: inline-block;
+    min-width: 65px;
+    text-align: right;
 }

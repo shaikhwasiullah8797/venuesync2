@@ -336,12 +336,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!routeOverlay) return;
         const id = 'alert-' + Date.now();
         const alertHtml = `
-            <div id="${id}" style="background: rgba(11, 15, 25, 0.95); border-left: 4px solid ${color}; border-radius: 8px; padding: 15px; display: flex; align-items: flex-start; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: slideDown 0.5s ease forwards; backdrop-filter: blur(10px); transition: opacity 0.5s;">
-                <i class="${iconCode}" style="color: ${color}; font-size: 1.5rem; margin-top: 2px;"></i>
-                <div>
-                    <strong style="color: white; display: block; margin-bottom: 4px;">Smart Routing Engine</strong>
-                    <span style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.4;">${message}</span>
+            <div id="${id}" role="alert" aria-live="assertive" style="background: rgba(11, 15, 25, 0.95); border-left: 4px solid ${color}; border-radius: 8px; padding: 15px; display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: slideDown 0.5s ease forwards; backdrop-filter: blur(10px); transition: opacity 0.5s;">
+                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                    <i class="${iconCode}" style="color: ${color}; font-size: 1.5rem; margin-top: 2px;" aria-hidden="true"></i>
+                    <div>
+                        <strong style="color: white; display: block; margin-bottom: 4px;">Smart Routing Engine</strong>
+                        <span style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.4;">${message}</span>
+                    </div>
                 </div>
+                <button aria-label="Close notification" onclick="document.getElementById('${id}').remove()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; padding: 0;">&times;</button>
             </div>`;
         routeOverlay.insertAdjacentHTML('beforeend', alertHtml);
         const newEl = document.getElementById(id);
@@ -398,25 +401,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatMessages.insertAdjacentHTML('beforeend', `<div style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-bottom-left-radius: 2px; color: var(--text-secondary); max-width: 85%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">${responseText}</div>`);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
-                // Trigger Web Speech Synthesis natively
-                const synth = window.speechSynthesis;
-                const utterThis = new SpeechSynthesisUtterance(responseText);
-                
-                // Prioritize Indian Hindi Voice
-                const voices = synth.getVoices();
-                const hindiVoice = voices.find(v => v.lang === 'hi-IN' || v.lang.includes('hi'));
-                const indianEnglish = voices.find(v => v.lang === 'en-IN');
-                
-                if (hindiVoice) {
-                    utterThis.voice = hindiVoice;
-                    utterThis.lang = 'hi-IN';
-                } else if (indianEnglish) {
-                    utterThis.voice = indianEnglish;
-                    utterThis.lang = 'en-IN';
+                // Trigger Authentic Google Cloud Text-To-Speech from backend
+                try {
+                    const ttsFallback = () => {
+                         // Graceful fallback to native synth if API lacks billing/credentials
+                         const synth = window.speechSynthesis;
+                         const utterThis = new SpeechSynthesisUtterance(responseText);
+                         utterThis.rate = 1.0; 
+                         synth.speak(utterThis);
+                    };
+
+                    const audioRes = await fetch('/api/tts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: responseText })
+                    });
+                    
+                    if (audioRes.ok) {
+                        const audioBlob = await audioRes.blob();
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        audio.play();
+                    } else {
+                        ttsFallback();
+                    }
+                } catch(e) {
+                    console.log("TTS Error, using local fallback");
                 }
-                
-                utterThis.rate = 1.0; // Slowed slightly for better Hindi pronunciation
-                synth.speak(utterThis);
 
             } catch (err) {
                 console.error("Chat Error:", err);

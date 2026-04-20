@@ -1,7 +1,9 @@
 fastapi
 uvicorn
-google-generativeai
+google-genai
 google-cloud-speech
 google-cloud-texttospeech
 pydantic
 python-dotenv
+pytest
+httpx

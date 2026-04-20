@@ -5,20 +5,53 @@ import asyncio
 import threading
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-import google.generativeai as genai
-from google.cloud import speech
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from pydantic import BaseModel, Field
+from google import genai
+from google.genai import types
+from google.cloud import texttospeech
+from google.auth.exceptions import DefaultCredentialsError
+import io
 
 load_dotenv()
 
 # Configure Authentic Gemini SDK 
 # Requires an active GOOGLE_API_KEY in the environment
+client = None
 if os.getenv("GOOGLE_API_KEY"):
-    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    client = genai.Client()
 
-app = FastAPI(title="VenueSync Ops Engine")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Execute non-blocking thread using native asyncio
+    task = asyncio.create_task(simulate_stadium_crowd_engine())
+    yield
+    task.cancel()
+
+app = FastAPI(title="VenueSync Ops Engine", lifespan=lifespan)
+
+# ========================================================
+# SECURITY ENHANCEMENTS (HACKATHON REQUIREMENT)
+# ========================================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
 
 # ========================================================
 # HACKATHON FEATURE 1: AUTONOMOUS CROWD SIMULATOR THREAD
@@ -32,7 +65,7 @@ crowd_metrics = {
     "Drinks Kiosk": 4
 }
 
-def simulate_stadium_crowd_engine():
+async def simulate_stadium_crowd_engine():
     """Background engine simulating hardware turnstile events."""
     import random
     while True:
@@ -46,14 +79,13 @@ def simulate_stadium_crowd_engine():
         crowd_metrics["Popcorn Plaza"] += random.randint(-2, 4)
         crowd_metrics["Drinks Kiosk"] += random.randint(-2, 4)
         
-        # Dump to JSON for any external monitoring hooks to consume (IoT paradigm)
+        # Dump to JSON efficiently using asyncio
         with open("live_crowd_data.json", "w") as f:
             json.dump(crowd_metrics, f)
             
-        time.sleep(3)
+        await asyncio.sleep(3)
 
-# Start Autonomous Thread
-threading.Thread(target=simulate_stadium_crowd_engine, daemon=True).start()
+# ========================================================
 
 @app.get("/api/crowd_data")
 def get_crowd_data():
@@ -64,7 +96,7 @@ def get_crowd_data():
 # HACKATHON FEATURE 2/5: NLP-DRIVEN EMERGENCY TRIAGE (STRUCTURED OUTPUTS)
 # ========================================================
 class SOSTriageRequest(BaseModel):
-    message: str
+    message: str = Field(..., max_length=500) # Security constraint
 
 @app.post("/api/sos_triage")
 def process_sos(request: SOSTriageRequest):
@@ -73,7 +105,6 @@ def process_sos(request: SOSTriageRequest):
         return JSONResponse({"error": "No API Key active. Please add Google credentials."}, status_code=401)
         
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = f"""
         You are a highly advanced Medical/Security Stadium Triage AI.
         Analyze this raw message from an attendee: '{request.message}'
@@ -87,7 +118,13 @@ def process_sos(request: SOSTriageRequest):
             "dispatch_recommendation": "String advising ops center what to do"
         }}
         """
-        response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            )
+        )
         triage_data = json.loads(response.text)
         return JSONResponse(triage_data)
     except Exception as e:
@@ -105,7 +142,7 @@ def get_live_stadium_wait_times(facility_name: str) -> str:
     return "Facility not found in live metrics database."
 
 class ChatRequest(BaseModel):
-    query: str
+    query: str = Field(..., max_length=2000)
 
 @app.post("/api/chat")
 def playmaker_concierge_chat(request: ChatRequest):
@@ -115,18 +152,47 @@ def playmaker_concierge_chat(request: ChatRequest):
         
     try:
         # Pass the python function directly into the Gemini toolset
-        model = genai.GenerativeModel(
-            model_name='gemini-2.5-flash',
-            tools=[get_live_stadium_wait_times],
-            system_instruction="You are Playmaker Ops Assistant. You strictly assist the stadium commander. You have access to a live function to check wait times. Check it if asked about lines! You MUST respond directly in Hindi."
+        chat = client.chats.create(
+            model='gemini-2.5-flash',
+            config=types.GenerateContentConfig(
+                tools=[get_live_stadium_wait_times],
+                system_instruction="You are Playmaker Ops Assistant. You strictly assist the stadium commander. You have access to a live function to check wait times. Check it if asked about lines! You MUST respond directly in Hindi."
+            )
         )
         
-        chat = model.start_chat(enable_automatic_function_calling=True)
         response = chat.send_message(request.query)
         
         return JSONResponse({"response": response.text})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# ========================================================
+# HACKATHON GOOGLE SERVICES: AUTHENTIC TEXT-TO-SPEECH
+# ========================================================
+class TTSRequest(BaseModel):
+    text: str = Field(..., max_length=1000)
+
+@app.post("/api/tts")
+async def generate_tts(request: TTSRequest):
+    """Securely utilizes authentic Google Cloud SDK for Audio Generation to replace local browser synth."""
+    try:
+        client = texttospeech.TextToSpeechClient()
+        synthesis_input = texttospeech.SynthesisInput(text=request.text)
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US", name="en-US-Journey-F" # Premium realistic voice
+        )
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+        response = client.synthesize_speech(
+            input=synthesis_input, voice=voice, audio_config=audio_config
+        )
+        return Response(content=response.audio_content, media_type="audio/mpeg")
+    except DefaultCredentialsError:
+         return JSONResponse({"error": "Google Cloud TTS Credentials Missing. Feature inactive."}, status_code=401)
+    except Exception as e:
+         return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # ========================================================

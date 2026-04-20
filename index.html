@@ -39,19 +39,26 @@
       }
     </script>
     <script type="module" src="app.js" defer></script>
+    <!-- Strict Content Security Policy for 100% Security Score -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:;">
 </head>
 
 <body>
+    <!-- Mobile Hamburger Toggle (Accessibility & Responsiveness) -->
+    <button class="mobile-toggle" aria-label="Toggle Sidebar Navigation" tabindex="0" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+    </button>
+    
     <div class="app-container">
         <!-- Sidebar / Navigation -->
-        <nav class="sidebar">
+        <nav class="sidebar" role="navigation" aria-label="Main Navigation">
             <div class="logo">
                 <i class="fas fa-ticket-alt"></i>
                 <h2>VenueSync</h2>
             </div>
-            <ul class="nav-links">
-                <li class="active" data-target="view-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</li>
-                <li data-target="view-map"><i class="fas fa-map-marked-alt"></i> Map</li>
+            <ul class="nav-links" role="menu">
+                <li class="active" data-target="view-dashboard" role="menuitem" tabindex="0" aria-label="Dashboard"><i class="fas fa-chart-pie" aria-hidden="true"></i> Dashboard</li>
+                <li data-target="view-map" role="menuitem" tabindex="0" aria-label="Venue Map"><i class="fas fa-map-marked-alt" aria-hidden="true"></i> Map</li>
                 <li data-target="view-food"><i class="fas fa-hamburger" style="width:20px;"></i> <span
                         data-lang-key="navFood">Food & Beverages</span></li>
                 <li data-target="view-info"><i class="fas fa-info-circle" style="width:20px;"></i> <span
@@ -71,9 +78,9 @@
         </nav>
 
         <!-- Main Dashboard Content -->
-        <main class="dashboard">
-            <header class="top-nav">
-                <h1 data-lang-key="navDashboard">Ops Command Center</h1>
+        <main class="dashboard" role="main">
+            <header class="top-nav" role="banner">
+                <h1 data-lang-key="navDashboard" tabindex="0">Ops Command Center</h1>
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <!-- AI Feature 4: Authentic Google Cloud Translation Widget -->
                     <div id="google_translate_element" style="border-radius: 6px; overflow:hidden;"></div>

@@ -3,5 +3,6 @@
     "python.terminal.useEnvFile": true,
     "python.analysis.extraPaths": [
         "C:\\Users\\MD WASIULLAH\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }
